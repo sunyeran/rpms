@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd" id="WebApp_ID" version="4.0">
+  <display-name>rpms</display-name>
+   
+  <!-- web容器是web项目的大脑 -->
+  <!-- 在web.xml中，执行顺序是：1.先执行listener 2。再执行filter  3.最后执行servlet 这就是执行顺序 
+    就像spring-hibernate.xml文件是在执行Listener的时候加载的，那注意这几个配置文件在web.xml中的加载顺序，因为资源文件是在配置文件【xml文件】中加载的，肯定是先加载的资源文件【properties文件】，才能在配置文件中调用资源文件中的变量的值使用
+  
+  -->
+     <display-name>springmvc_demo</display-name>
+ <!-- web容器，首先需要引入spring，让spring管理各个框架，并将其注入为bean -->
+ <!-- 这个相当于定一个 变量在web.xml中，在下面的listener  org.springframework.web.context.ContextLoaderListener中，加载这个spring-hibernate.xml文件 -->
+     <context-param>
+         <param-name>contextConfigLocation</param-name>
+         <param-value>classpath:spring-hibernate.xml</param-value>
+     </context-param>
+ <!-- 配置控制层的filter信息 -->
+     <filter>
+         <filter-name>encodingFilter</filter-name>
+         <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+         <init-param>
+             <param-name>encoding</param-name>
+             <param-value>utf-8</param-value>
+         </init-param>
+         <init-param>
+             <param-name>forceEncoding</param-name>
+             <param-value>true</param-value>
+         </init-param>
+     </filter>
+     <filter-mapping>
+         <filter-name>encodingFilter</filter-name>
+         <url-pattern>/*</url-pattern>
+     </filter-mapping>
+ 
+     <!-- openSessionInView配置 作用是延迟session关闭到view层 -->
+     <filter>
+         <filter-name>openSessionInViewFilter</filter-name>
+         <filter-class>org.springframework.orm.hibernate4.support.OpenSessionInViewFilter</filter-class>
+         <init-param>
+             <param-name>singleSession</param-name>
+             <param-value>true</param-value>
+         </init-param>
+     </filter>
+ 
+ <!-- 监听servletContext，启动contextConfigLocation中的spring配置信息 -->
+     <listener>
+         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+     </listener>
+ 
+ 
+     <!-- 防止spring内存溢出监听器   可用可不用-->
+     <listener>
+         <listener-class>org.springframework.web.util.IntrospectorCleanupListener</listener-class>
+     </listener>
+ 
+ 
+ <!-- 类似与servlet 需要在web.xml中都需要配置一样，spring的思想是让这些servlet【controller也是servlet】继承了一个基础的servlet，那就只需在web.xml中配置一个servlet即可。 -->
+ <!-- 这个servlet和下面的servlet-mapping相配合使用，注明了所有的以.htmls结尾的请求都被截取到，去到servlet中去找相对应的方法 进行处理 -->
+     <servlet>
+         <description>spring mvc servlet</description>
+         <servlet-name>rest</servlet-name>
+         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+         <init-param>
+             <param-name>contextConfigLocation</param-name>
+             <!-- 此处配置的是SpringMVC的配置文件 -->
+             <param-value>classpath:spring-mvc.xml</param-value>
+         </init-param>
+         <load-on-startup>1</load-on-startup>
+     </servlet>
+     <!-- 配置了springmvc拦截的url为以.hmls结尾的请求 -->
+     <servlet-mapping>
+         <servlet-name>rest</servlet-name>
+         <url-pattern>*.htmls</url-pattern>
+     </servlet-mapping>
+ 
+     <filter-mapping>
+         <filter-name>openSessionInViewFilter</filter-name>
+         <url-pattern>/*</url-pattern>
+     </filter-mapping>
+ 
+     <!-- 配置session超时时间，单位分钟 -->
+     <session-config>
+         <session-timeout>30</session-timeout>
+     </session-config>
+     <!-- 欢迎界面 默认的项目访问界面 -->
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+</web-app>

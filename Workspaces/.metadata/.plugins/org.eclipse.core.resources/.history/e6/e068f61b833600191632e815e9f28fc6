@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <beans xmlns="http://www.springframework.org/schema/beans"
+      xmlns:mvc="http://www.springframework.org/schema/mvc"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:p="http://www.springframework.org/schema/p"
+      xmlns:context="http://www.springframework.org/schema/context"
+      xmlns:tx="http://www.springframework.org/schema/tx"
+      xmlns:aop="http://www.springframework.org/schema/aop"
+      xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+         http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd
+         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd
+         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd">
+ 
+     <!-- 自动扫描@Controller注入为bean -->
+     <context:component-scan base-package="com.it" >
+     
+     </context:component-scan>
+     <!-- 标明注解事务 -->
+     <tx:annotation-driven transaction-manager="transactionManager" />
+     
+     <!-- 以下为SpringMVC配置 -->
+     <mvc:annotation-driven>
+         <!-- 返回json数据，@response使用 -->
+         <mvc:message-converters register-defaults="true">
+             <bean
+                 class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                 <property name="supportedMediaTypes">
+                     <list>
+                         <value>text/html;charset=UTF-8</value>
+                         <value>application/json;charset=UTF-8</value>
+                     </list>
+                 </property>
+ 
+             </bean>
+         </mvc:message-converters>
+     </mvc:annotation-driven>
+ 
+     <!-- 对模型视图名称的解析，即在模型视图名称添加前后缀 -->
+     <bean
+         class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+         <property name="viewClass"
+             value="org.springframework.web.servlet.view.JstlView" />
+         <property name="prefix" value="/WEB-INF/views" />
+         <property name="suffix" value=".jsp" />
+     </bean>
+     
+     <!-- 下面设置配置事物以及事务管理，是一种事务的处理方式，还可以有另一种 就是不写下面这一大块，直接在service层添加@Transactional
+     解释一下这两种的区别：
+     1.@Transactional  在serviceImpl层使用这个注解，表示默认的事务都是propagation="REQUIRED"，这样不会有下面read-only这一项了，那么比如在查询的时候只要保证这个查询是在一个事务中，将结果查询出来，对这个对象进行修改，不用调用save等方法，事务会自动帮你进行持久化的操作，会将你这个操作保存在数据库中
+     2.使用下面的这两个事务管理，可以自己配置什么方法什么操作【insert、get】，可以自己设置事务的类型，也可以设置read-only。设置了read-only的话，在从数据库中查询出一条记录，对对象进行更改，那就必须调用save或者update方法才能进行保存
+     
+     
+      配置事务增强处理Bean，指定事务管理器   意思是这个id为transactionAdvice的事务(建议)，他的事务管理者是上面指定的id为transactionManager的事务管理器
+     <tx:advice id="transactionAdvice" transaction-manager="transactionManager" >
+         配置详细事务处理语义
+         <tx:attributes>
+             在指定的如下的这些操作发生时，例如insert插入数据发生时，事务类型的request ，而get等操作，事务类型是supports，并且是只读
+             <tx:method name="insert*" propagation="REQUIRED" />
+             <tx:method name="update*" propagation="REQUIRED" />
+             <tx:method name="delete*" propagation="REQUIRED" />
+ 
+             <tx:method name="get*" propagation="SUPPORTS" read-only="true" />
+             <tx:method name="find*" propagation="SUPPORTS" read-only="true" />
+             <tx:method name="select*" propagation="SUPPORTS" read-only="true" />
+             <tx:method name="load*" propagation="SUPPORTS" read-only="true" />
+ 
+             其他采用默认事务方式
+             <tx:method name="*"  propagation="REQUIRED" />
+             
+         </tx:attributes>
+     </tx:advice>
+ 
+     Spring aop事务管理  
+     <aop:config proxy-target-class="true">
+         配置切入点    指定这个aop:pointcut去引用上面规定的advice，也就是说规定下面的这个expression指定的路径下的service.impl下的所有的方法，都按照上面advice中的规定去执行，碰上什么操作，事务就是什么类型的，这就是事务管理器的好处了
+         解释一下，为什么这个要指定在service层：因为在同一个事务中，可能要对多张表进行多个不同的操作，才是一个完整的逻辑，例如淘宝上买东西，你转账之后你的钱减少了，对方的钱应该增加了，这两个操作在一起才是一个完整的操作，而如果这两个操作不在一个事务中，也就是如果将事务的操作指定在Dao层【MVC的设计模式：Dao层就是对数据库进行最简单的增删改查操作，而service层是进行逻辑处理的，一个完整的逻辑处理就要涉及到多次操作】事务操作失败，发生回滚，那你的帐减少了，对方的帐并没有增加，这样就不美丽的，因此，将事务的管理，指定在了service层
+         <aop:pointcut id="transactionPointcut"
+             expression="execution(* com.it.service..*Impl.*(..))" />expression中表达式所指意思： 所有的文件下的 com.it.service开头的包，以Impl结尾的类下的所有的方法，都执行上面advice的规定 
+         指定在txAdvice切入点应用txAdvice事务增强处理
+         <aop:advisor pointcut-ref="transactionPointcut"
+             advice-ref="transactionAdvice" />
+     </aop:config> -->
+     
+ </beans>

@@ -1,0 +1,152 @@
+package com.rpms.entity;
+
+import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import static javax.persistence.GenerationType.IDENTITY;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
+/**
+ * User entity. @author MyEclipse Persistence Tools
+ */
+@Entity
+@Table(name = "user", catalog = "rpms")
+
+public class User implements java.io.Serializable {
+
+	// Fields
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private Integer userId;
+	private String name;
+	private String userName;
+	private String password;
+	private String department;
+	private String positionalTitles;
+	private Double workloadLevel;
+	private String groupsId;
+	private Set<Paper> papers = new HashSet<Paper>(0);
+
+	// Constructors
+
+	/** default constructor */
+	public User() {
+	}
+
+	/** full constructor */
+	public User(String name, String userName, String password, String department, String positionalTitles,
+			Double workloadLevel, String groupsId, Set<Paper> papers) {
+		this.name = name;
+		this.userName = userName;
+		this.password = password;
+		this.department = department;
+		this.positionalTitles = positionalTitles;
+		this.workloadLevel = workloadLevel;
+		this.groupsId = groupsId;
+		this.papers = papers;
+	}
+
+	// Property accessors
+	@Id
+	@GeneratedValue(strategy = IDENTITY)
+
+	@Column(name = "user_id", unique = true, nullable = false)
+
+	public Integer getUserId() {
+		return this.userId;
+	}
+
+	public void setUserId(Integer userId) {
+		this.userId = userId;
+	}
+
+	@Column(name = "name")
+
+	public String getName() {
+		return this.name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	@Column(name = "userName")
+
+	public String getUserName() {
+		return this.userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	@Column(name = "password")
+
+	public String getPassword() {
+		return this.password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	@Column(name = "department")
+
+	public String getDepartment() {
+		return this.department;
+	}
+
+	public void setDepartment(String department) {
+		this.department = department;
+	}
+
+	@Column(name = "positionalTitles")
+
+	public String getPositionalTitles() {
+		return this.positionalTitles;
+	}
+
+	public void setPositionalTitles(String positionalTitles) {
+		this.positionalTitles = positionalTitles;
+	}
+
+	@Column(name = "workloadLevel", precision = 22, scale = 0)
+
+	public Double getWorkloadLevel() {
+		return this.workloadLevel;
+	}
+
+	public void setWorkloadLevel(Double workloadLevel) {
+		this.workloadLevel = workloadLevel;
+	}
+
+	@Column(name = "groups_id")
+
+	public String getGroupsId() {
+		return this.groupsId;
+	}
+
+	public void setGroupsId(String groupsId) {
+		this.groupsId = groupsId;
+	}
+
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user")
+
+	public Set<Paper> getPapers() {
+		return this.papers;
+	}
+
+	public void setPapers(Set<Paper> papers) {
+		this.papers = papers;
+	}
+
+}
